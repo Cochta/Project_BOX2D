@@ -3,7 +3,9 @@
 Player::Player()
 {
 	_direction = b2Vec2(0, 0);
-	clock.restart();
+	_clock.restart();
+	_piou.setBuffer(Properties::Instance()->GetPiou());
+	_piou.setVolume(10);
 }
 
 void Player::Init(b2World& world)
@@ -17,20 +19,23 @@ void Player::Init(b2World& world)
 	bodyDef.fixedRotation = true;
 	bodyDef.type = b2_dynamicBody;
 	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT));
-	bodyDef.position.Set(windowSize.x / 2, windowSize.y /2);
+	bodyDef.position.Set(windowSize.x / 2, windowSize.y / 2);
 
 	_body = world.CreateBody(&bodyDef);
 
 	// Shape of the physical (A box)
 	b2PolygonShape ship;
-	ship.SetAsBox(Utility::PixelsToMeters(_shape.getGlobalBounds().width /2),
-		Utility::PixelsToMeters(_shape.getGlobalBounds().height /2));
+	ship.SetAsBox(Utility::PixelsToMeters(_shape.getGlobalBounds().width / 2),
+		Utility::PixelsToMeters(_shape.getGlobalBounds().height / 2));
 
 	// The fixture is what it defines the physic react
 	b2FixtureDef playerFixtureDef;
 	playerFixtureDef.shape = &ship;
 	playerFixtureDef.density = 1.0f;
 	playerFixtureDef.friction = 1.0f;
+	ContactEvent* m_userData = new ContactEvent(*this);
+	playerFixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(m_userData);
+
 	//playerFixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
 
@@ -44,14 +49,15 @@ void Player::Move(float time)
 
 void Player::Fire(b2World& world)
 {
-	if (clock.getElapsedTime().asSeconds() > Properties::FIRE_RATE)
+	if (time.asSeconds() > Properties::FIRE_RATE)
 	{
-		Laser laser(world, _body->GetPosition().x, _body->GetPosition().y);
-
-		laser.SetDirection(0, -10);
-		_lasers.emplace_back(laser);
-		clock.restart();
+		_lasers.emplace_back(world, _body->GetPosition().x, _body->GetPosition().y, *this);
+		_lasers.back().SetDirection(0, -1);
+		_piou.play();
+		
+		_clock.restart();
 	}
+	time = _clock.getElapsedTime();
 }
 
 void Player::Update()
@@ -63,6 +69,12 @@ void Player::Update()
 
 	// Set the position of the Graphic object
 	_shape.setPosition(graphicPosition);
+
+	std::erase_if(_lasers, [](Laser& laser)
+		{
+			return laser.IsBroken();
+		}
+	);
 
 	for (auto& laser : _lasers)
 	{

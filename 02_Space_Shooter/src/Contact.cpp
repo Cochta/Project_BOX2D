@@ -3,65 +3,99 @@
 #include <iostream>
 #include <box2d/b2_contact.h>
 
+#include "Planet.h"
+#include "Player.h"
+
 Contact::Contact()
 {
+	_boom.setBuffer(Properties::Instance()->GetBoom());
+	_clong.setBuffer(Properties::Instance()->GetClong());
+	_flop.setBuffer(Properties::Instance()->GetFlop());
 }
 
 void Contact::BeginContact(b2Contact* contact)
 {
-	b2Body* bodyA = contact->GetFixtureA()->GetBody();
-	b2Body* bodyB = contact->GetFixtureB()->GetBody();
+	auto userDataA = contact->GetFixtureA()->GetUserData().pointer;
+	auto userDataB = contact->GetFixtureB()->GetUserData().pointer;
 
-	auto typeA = static_cast<Properties::Type>(bodyA->GetFixtureList()->GetFilterData().groupIndex);
-	auto typeB = static_cast<Properties::Type>(bodyB->GetFixtureList()->GetFilterData().groupIndex);
 
-	auto userDataA = contact->GetFixtureA()->GetUserData();
-	auto userDataB = contact->GetFixtureB()->GetUserData();
-
-	auto aPointer = userDataA.pointer;
-	auto bPointer = userDataA.pointer;
-
-	if (typeA == Properties::Type::Asteroid && typeB == Properties::Type::Laser ||
-		typeA == Properties::Type::Laser && typeB == Properties::Type::Asteroid)
+	if (userDataA != 0 && userDataB != 0)
 	{
-		Asteroid* a;
+		auto infoA = reinterpret_cast<ContactEvent*>(userDataA);
+		auto infoB = reinterpret_cast<ContactEvent*>(userDataB);
 
-		if (typeA == Properties::Type::Asteroid)
+		if (infoA->TypeOfContact == ContactType::Laser && infoB->TypeOfContact == ContactType::Asteroid)
 		{
-			a = reinterpret_cast<Asteroid*>(userDataA.pointer);
-
+			infoA->_laser->player.AddScore(50);
+			infoB->_asteroid->SetExploded();
+			infoA->_laser->SetBroken();
+			_boom.play();
 		}
-		else if (typeB == Properties::Type::Asteroid)
+		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Laser)
 		{
-			a = reinterpret_cast<Asteroid*>(userDataB.pointer);
+			infoB->_laser->player.AddScore(50);
+			infoA->_asteroid->SetExploded();
+			infoB->_laser->SetBroken();
+			_boom.play();
 		}
-		a->IsBroken = true;
-		std::cout << a->_index << std::endl;
-		// Player hit an enemy
-		/*asteroid->IsBroken = true;
-		std::cout << asteroid->_index << std::endl;
-		std::cout << (asteroid->IsBroken ? "true" : "false") << std::endl;*/
-
+		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Asteroid)
+		{
+			//do boom
+			/*infoB->_asteroid->SetBroken();
+			infoA->_asteroid->SetBroken();*/
+		}
+		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Player)
+		{
+			infoB->_player->TakeDMG();
+			infoA->_asteroid->SetExploded();
+			_clong.play();
+		}
+		else if (infoA->TypeOfContact == ContactType::Player && infoB->TypeOfContact == ContactType::Asteroid)
+		{
+			infoA->_player->TakeDMG();
+			infoB->_asteroid->SetExploded();
+			_clong.play();
+		} 
+		else if (infoA->TypeOfContact == ContactType::Planet && infoB->TypeOfContact == ContactType::Asteroid)
+		{
+			infoA->_planet->player.AddScore(-100);
+			infoB->_asteroid->SetExploded();
+			_flop.play();
+		}
+		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Planet)
+		{
+			infoB->_planet->player.AddScore(-100);
+			infoA->_asteroid->SetExploded();
+			_flop.play();
+		}
 	}
-	/*
-	auto elementA = contact->GetFixtureA()->GetBody()->GetUserData();
-	auto elementB = contact->GetFixtureB()->GetBody()->GetUserData();
-
-	Asteroid* asteroid = reinterpret_cast<Asteroid*>(elementA.pointer);
-	Laser* laser = reinterpret_cast<Laser*>(elementB.pointer);*/
-
-	//if (laser != nullptr && asteroid != nullptr)
-	//{
-	//	//asteroid->IsBroken = true;
-	//	std::cout << asteroid->IsBroken << std::endl;
-	//}
-	//else
-	//{
-	//	//std::cout << "not boom" << std::endl;
-	//}
 }
 
 void Contact::EndContact(b2Contact* contact)
 {
+	auto userDataA = contact->GetFixtureA()->GetUserData().pointer;
+	auto userDataB = contact->GetFixtureB()->GetUserData().pointer;
 
+	if (userDataA != 0 && userDataB != 0)
+	{
+		auto infoA = reinterpret_cast<ContactEvent*>(userDataA);
+		auto infoB = reinterpret_cast<ContactEvent*>(userDataB);
+
+		if (infoA->TypeOfContact == ContactType::Environment && infoB->TypeOfContact == ContactType::Asteroid)
+		{
+			infoB->_asteroid->SetBroken();
+		}
+		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Environment)
+		{
+			infoA->_asteroid->SetBroken();
+		}
+		else if (infoA->TypeOfContact == ContactType::Laser && infoB->TypeOfContact == ContactType::Roof)
+		{
+			infoA->_laser->SetBroken();
+		}
+		else if (infoA->TypeOfContact == ContactType::Roof && infoB->TypeOfContact == ContactType::Laser)
+		{
+			infoB->_laser->SetBroken();
+		}
+	}
 }

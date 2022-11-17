@@ -4,14 +4,16 @@
 
 
 Game::Game() :
-	_world(b2Vec2(0.0f, 0.0f)) // gravity
+	_world(b2Vec2(0.0f, 0.0f)), // gravity
+	_planet(_player)
 {
+	Properties::Instance()->GetTheme().play();
 	Init();
 }
 
 void Game::Init()
 {
-	_window.create(sf::VideoMode(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT), "Space shooter", sf::Style::Close);
+	_window.create(sf::VideoMode(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT), "EARTH DEFENDER", sf::Style::Close);
 	_window.setPosition(sf::Vector2i(500, 0));
 	_window.setVerticalSyncEnabled(true);
 	_window.setFramerateLimit(144);
@@ -28,33 +30,11 @@ void Game::Init()
 	}
 	_menu.Main();
 	_world.SetContactListener(&_contact);
+	_planet.Init(_world);
 }
 void Game::Play()
 {
-
-	//floor
-	b2BodyDef leftWallBD;
-	leftWallBD.position.Set(0.0f, 0.0f);
-	b2Body* leftWallBody = _world.CreateBody(&leftWallBD);
-
-	b2PolygonShape leftWallBox;
-	leftWallBox.SetAsBox(1.0f / Utility::PIXEL_METER_RATIO, static_cast<float>(Properties::WINDOW_SIZE_HEIGHT));
-	leftWallBody->CreateFixture(&leftWallBox, 0.0f);
-
-	b2BodyDef rightWallBD = leftWallBD;
-	rightWallBD.position.Set(static_cast<float>(Properties::WINDOW_SIZE_WIDTH) / Utility::PIXEL_METER_RATIO, 0.0f);
-	b2Body* rightWallBody = _world.CreateBody(&rightWallBD);
-
-	b2PolygonShape rightWallBox = leftWallBox;
-	rightWallBody->CreateFixture(&rightWallBox, 0.0f);
-
-	/*b2BodyDef roofBD = leftWallBD;
-	roofBD.position.Set(0.0f, 0.0f);
-	b2Body* roofBody = _world.CreateBody(&roofBD);
-
-	b2PolygonShape roofBox = leftWallBox;
-	roofBox.SetAsBox(static_cast<float>(Properties::WINDOW_SIZE_WIDTH), 1.0f / Utility::PIXEL_METER_RATIO);
-	roofBody->CreateFixture(&roofBox, 0.0f);*/
+	CreateEnvironnent();
 
 	sf::Event event;
 
@@ -63,7 +43,8 @@ void Game::Play()
 
 	while (_window.isOpen())
 	{
-		spawnAsteroid();
+		if (!Lost)
+			spawnAsteroid();
 		// on inspecte tous les évènements de la fenêtre qui ont été émis depuis la précédente itération
 
 		while (_window.pollEvent(event))
@@ -80,31 +61,26 @@ void Game::Play()
 	}
 }
 
+void Game::CreateEnvironnent()
+{
+	Environment rightWall(Wall::Right, _world);
+	Environment leftWall(Wall::Left, _world);
+	Roof roof(_world);
+	Environment floor(Wall::Bottom, _world);
+}
+
 void Game::spawnAsteroid()
 {
 	if (IsStarted && _enemyClock.getElapsedTime().asSeconds() >= Properties::ENEMY_SPAWN_RATE)
 	{
-		//Asteroid a(
-		//	Utility::getRandomInt(0,Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH)),
-		//	0,
-		//	Utility::getRandomInt(0, 11),
-		//	_world
-		//);
-		//a.SetDirection(Utility::getRandomInt(0, 40) - 20, Utility::getRandomInt(10, 100));
-
-
-		//_asteroids.emplace_back(a);
-
-		//a.SetDirection(Utility::getRandomInt(0, 40) - 20, Utility::getRandomInt(10, 100));
-
-
 		_asteroids.emplace_back(
-			Utility::getRandomInt(0, Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH)),
+			Utility::getRandomInt(Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH / 10),
+				Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH - (Properties::WINDOW_SIZE_WIDTH / 10))),
 			0,
 			Utility::getRandomInt(0, 11),
 			_world
 		);
-		_asteroids.back().SetDirection(Utility::getRandomInt(0, 40) - 20, Utility::getRandomInt(10, 100));
+		_asteroids.back().SetDirection(Utility::getRandomInt(0, 80) - 40, Utility::getRandomInt(10, 100));
 		_enemyClock.restart();
 	}
 }
@@ -147,54 +123,66 @@ void Game::checkEvent(sf::Event& event)
 
 void Game::checkEventPoll(sf::Event& event)
 {
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Space)
+	{
+		_player.time = sf::seconds(3.0f);
+	}
 	if (event.type == sf::Event::Closed)
 	{
 		_window.close();
 	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && !IsStarted && !IsRules)
 	{
-		if (!IsStarted)
-		{
-			_menu.InGame(4);
-			IsStarted = true;
-			_player.Init(_world);
-			_planet.Init(_world);
-		}
+		IsStarted = true;
+		_player.Init(_world);
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R) && !IsStarted && !IsRules)
+	{
+		IsRules = true;
+		_menu.Rules();
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) && !IsStarted && !IsRules)
 	{
 		exit(0);
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::M) && IsRules)
+	{
+		IsRules = false;
+		_menu.Main();
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::B) && Lost)
+	{
+		_menu.Main();
+		Lost = false;
+		IsStarted = false;
+		_world.DestroyBody(_player.GetBody());
+		_player = Player();
+		_asteroids.clear();
 	}
 }
 
 void Game::update(sf::Clock& clock, sf::Time& totalElapsed)
 {
 	sf::Time elapsed = clock.restart();
-	_world.Step(elapsed.asSeconds(), 6, 2);
+	if (_player.GetHP() <= 0)
+	{
+		Lost = true;
+	}
+	if (Lost)
+	{
+		_menu.GameOver(_player.GetScore());
+	}
+	else
+	{
+		_world.Step(elapsed.asSeconds(), 6, 2);
+	}
 	_player.Move(elapsed.asSeconds());
 	_player.Update();
 	_planet.Update();
 
-	/*std::vector<Asteroid> tempAsteroid;
-	for (auto a : _asteroids)
-	{
-		if (!a.IsBroken)
-		{
-			tempAsteroid.emplace_back(a);
-		}
-	}
-	_asteroids.clear();
-	_asteroids = tempAsteroid;*/
 	std::erase_if(_asteroids, [](Asteroid& asteroid)
 		{
-			if (asteroid.IsBroken)
-			{
-				std::cout << "delete " << asteroid._index << std::endl;
-				//asteroid.DeleteBody();
-				return true;
-			}
-			return false;
+			return asteroid.IsBroken();
 		}
 	);
 
@@ -209,7 +197,6 @@ void Game::display()
 	_window.clear();
 
 	//_window.draw(something to draw);
-	_window.draw(_menu);
 
 	for (const auto& sprite : _background)
 	{
@@ -221,8 +208,12 @@ void Game::display()
 		_window.draw(asteroid);
 	}
 
-
 	_window.draw(_player);
+	if (IsStarted && !Lost)
+	{
+		_menu.InGame(_player.GetHP(), _player.GetScore());
+	}
+
 	_window.draw(_menu);
 	_window.draw(_planet);
 	// Window Display

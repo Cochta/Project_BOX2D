@@ -1,9 +1,13 @@
 #pragma once
 
+#include <list>
+
 #include "Menu.h"
 #include "Player.h"
 #include "Planet.h"
 #include "Asteroid.h"
+#include "Environment.h"
+#include "Animation.h"
 #include "Utility.h"
 #include "Contact.h"
 #include "SFML/Graphics.hpp"
@@ -33,12 +37,15 @@ private:
 
 	Player _player;
 	Planet _planet;
-	std::vector<Asteroid> _asteroids;
+	std::list<Asteroid> _asteroids;
 
 	Contact _contact;
 
 	bool IsStarted = false;
+	bool IsRules = false;
+	bool Lost = false;
 
+	void CreateEnvironnent();
 	void spawnAsteroid();
 	void checkEvent(sf::Event& event);
 	void checkEventPoll(sf::Event& event);

@@ -8,9 +8,11 @@ class Contact : public b2ContactListener
 {
 public:
 	Contact();
-
 	void BeginContact(b2Contact* contact) override;
 	void EndContact(b2Contact* contact) override;
-private:
 
+private:
+	sf::Sound _boom;
+	sf::Sound _clong;
+	sf::Sound _flop;
 };

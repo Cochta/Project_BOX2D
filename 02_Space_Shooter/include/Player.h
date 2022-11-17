@@ -14,7 +14,7 @@
 #include <box2d/b2_fixture.h>
 #include <box2d/box2d.h>
 
-#include <vector>
+#include <list>
 class Player : public sf::Drawable
 {
 public:
@@ -25,6 +25,13 @@ public:
 	void Move(float time);
 
 	void Fire(b2World& world);
+	void TakeDMG() { _HP -= 1; }
+	int GetHP() { return _HP; }
+
+	void AddScore(int scoreToAdd) { _score += scoreToAdd; }
+	int GetScore() { return _score; }
+
+	b2Body* GetBody() { return _body; }
 
 	void Update();
 
@@ -34,10 +41,17 @@ public:
 	void SetDirectionX(float x) { _direction.x = x; }
 	void SetDirectionY(float y) { _direction.y = y; }
 	void SetDumping(float damping) { _body->SetLinearDamping(damping); }
+	sf::Time time;
+
+
 private:
-	sf::Clock clock;
 	b2Body* _body;
 	sf::Sprite _shape;
 	b2Vec2 _direction;
-	std::vector<Laser> _lasers;
+	std::list<Laser> _lasers;
+	sf::Sound _piou;
+	sf::Clock _clock;
+
+	int _HP = 3;
+	int _score = 0;
 };

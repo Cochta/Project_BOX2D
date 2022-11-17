@@ -1,6 +1,6 @@
 #include "Planet.h"
 
-Planet::Planet()
+Planet::Planet(Player& player) :player(player)
 {
 
 }
@@ -19,16 +19,19 @@ void Planet::Init(b2World& world)
 
 	_body = world.CreateBody(&bodyDef);
 
-	// Shape of the physical (A box)
-	b2PolygonShape planet;
-	planet.SetAsBox(windowSize.x - 2, Utility::PixelsToMeters(_shape.getGlobalBounds().height / 2));
+	// Shape of the physical (A circle)
+	b2CircleShape planet;
+	planet.m_radius = Utility::PixelsToMeters((_shape.getLocalBounds().width - 30) / 2); // 30 is magic number
 
 	// The fixture is what it defines the physic react
-	b2FixtureDef playerFixtureDef;
-	playerFixtureDef.shape = &planet;
-	playerFixtureDef.density = 0.0f;
+	b2FixtureDef planetFixtureDef;
+	planetFixtureDef.shape = &planet;
+	planetFixtureDef.density = 0.0f;
 
-	_body->CreateFixture(&playerFixtureDef);
+	ContactEvent* m_userData = new ContactEvent(*this);
+	planetFixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(m_userData);
+
+	_body->CreateFixture(&planetFixtureDef);
 
 	b2Vec2 bodyPos = _body->GetPosition();
 

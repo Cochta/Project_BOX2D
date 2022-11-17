@@ -13,10 +13,15 @@
 #include <box2d/box2d.h>
 
 #include <vector>
+
+#include "Player.h"
+
 class Planet : public sf::Drawable
 {
 public:
-	Planet();
+	Planet(Player& player);
+
+	Player& player;
 
 	void Init(b2World& world);
 

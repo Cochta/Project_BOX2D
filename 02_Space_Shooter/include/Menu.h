@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <fstream>
+
 #include "Properties.h"
 
 #include "SFML/Graphics.hpp"
@@ -13,15 +16,16 @@ public:
 
 	void Main();
 
-	void InGame(int HP);
+	void InGame(int HP, int score);
 
-	void Lost();
+	void GameOver(int score);
 
-	void Win();
+	void Rules();
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
 	std::vector<sf::RectangleShape> _elements;
 	std::vector<sf::Text> _texts;
+	int _highScore;
 };

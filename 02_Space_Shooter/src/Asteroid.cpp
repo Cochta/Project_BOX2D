@@ -3,13 +3,8 @@
 #include "Properties.h"
 #include "Properties.h"
 
-int Asteroid::globalIndex = 0;
 Asteroid::Asteroid(float x, float y, int spriteIndex, b2World& world) : _world(world)
 {
-	globalIndex++;
-	_index = globalIndex;
-	type = Properties::Type::Asteroid;
-	IsBroken = false;
 	_shape.setTexture(Properties::Instance()->GetAsteroidTexture(spriteIndex));
 	//_shape.setScale(0.5, 0.5);
 	_shape.setOrigin(_shape.getLocalBounds().width / 2, _shape.getLocalBounds().height / 2);
@@ -25,21 +20,23 @@ Asteroid::Asteroid(float x, float y, int spriteIndex, b2World& world) : _world(w
 
 	// Shape of the physical (A box)
 	b2PolygonShape laser;
-	laser.SetAsBox(Utility::PixelsToMeters(_shape.getGlobalBounds().width / 2),
-		Utility::PixelsToMeters(_shape.getGlobalBounds().height / 2));
+	laser.SetAsBox(Utility::PixelsToMeters(_shape.getLocalBounds().width / 2),
+		Utility::PixelsToMeters(_shape.getLocalBounds().height / 2));
 
 	// The fixture is what it defines the physic react
-	b2FixtureDef asteroidFixtureDef;
-	asteroidFixtureDef.shape = &laser;
-	asteroidFixtureDef.density = 1.0f;
-	asteroidFixtureDef.isSensor = false;
-	asteroidFixtureDef.filter.groupIndex = static_cast<int16>(type);
-	asteroidFixtureDef.userData.pointer = reinterpret_cast<std::uintptr_t>(this);
+	b2FixtureDef _asteroidFixtureDef;
+	_asteroidFixtureDef.shape = &laser;
+	_asteroidFixtureDef.density = 1.0f;
+	_asteroidFixtureDef.isSensor = true;
+
+
+	ContactEvent* m_userData = new ContactEvent(*this);
+	_asteroidFixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(m_userData);
 
 	//laserFixtureDef.friction = 1.0f;
 	////playerFixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
-	_body->CreateFixture(&asteroidFixtureDef);
+	_fixture = _body->CreateFixture(&_asteroidFixtureDef);
 }
 
 Asteroid Asteroid::operator=(const Asteroid& other)
@@ -53,8 +50,19 @@ Asteroid Asteroid::operator=(const Asteroid& other)
 	return a;
 }
 
+Asteroid::~Asteroid()
+{
+	_world.DestroyBody(_body);
+}
+
 void Asteroid::Update()
 {
+	if (_hasExploded)
+	{
+		Boom();
+		_hasExploded = false;
+		_clock.restart();
+	}
 	b2Vec2 bodyPos = _body->GetPosition();
 
 	// Translate meters to pixels
@@ -62,16 +70,30 @@ void Asteroid::Update()
 
 	// Set the position of the Graphic object
 	_shape.setPosition(graphicPosition);
-}
-
-void Asteroid::DeleteBody()
-{
-	
-	std::cout << "delete id:" << _index << std::endl;
-	_world.DestroyBody(_body);
+	if (_isInAnimation)
+	{
+		_shape.setScale(_shape.getScale().x + 0.02f, _shape.getScale().y + 0.02f);
+		_shape.setOrigin(_shape.getLocalBounds().width / 2, _shape.getLocalBounds().height / 2);
+		if (_clock.getElapsedTime().asSeconds() >= 1)
+		{
+			SetBroken();
+		}
+	}
 }
 
 void Asteroid::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(_shape);
+}
+
+void Asteroid::Boom()
+{
+	_body->DestroyFixture(_fixture);
+	_body->SetLinearVelocity(b2Vec2(0, 0));
+
+	_shape = sf::Sprite();
+	_shape.setTexture(Properties::Instance()->GetExplosionTexture());
+	_shape.setScale(0.01f, 0.01f);
+	_shape.setOrigin(_shape.getLocalBounds().width / 2, _shape.getLocalBounds().height / 2);
+	_isInAnimation = true;
 }
