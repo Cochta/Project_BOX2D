@@ -17,9 +17,9 @@ public:
 
 	void Main();
 
-	void InGame(int HP, int score, int planet_HP);
+	void InGame(int player_HP, int score, int planet_HP);
 
-	void GameOver(int score);
+	void GameOver(int player_HP, int score, int planet_HP);
 
 	void Rules();
 

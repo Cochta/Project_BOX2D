@@ -9,8 +9,8 @@
 Contact::Contact()
 {
 	_boom.setBuffer(Properties::Instance()->GetBoom());
-	_clong.setBuffer(Properties::Instance()->GetClong());
-	_flop.setBuffer(Properties::Instance()->GetFlop());
+	_clong.setBuffer(Properties::Instance()->GetFlop());
+	_flop.setBuffer(Properties::Instance()->GetClong());
 }
 
 void Contact::BeginContact(b2Contact* contact)

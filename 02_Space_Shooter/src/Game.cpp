@@ -168,7 +168,7 @@ void Game::update(sf::Clock& clock, sf::Time& totalElapsed)
 	}
 	if (Lost)
 	{
-		_menu.GameOver(_player.GetScore());
+		_menu.GameOver(_player.GetHP(), _player.GetScore(), _planet.GetHP());
 	}
 	else
 	{

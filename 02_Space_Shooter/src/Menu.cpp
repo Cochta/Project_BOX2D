@@ -85,7 +85,7 @@ void Menu::InGame(int player_HP, int score, int planet_HP)
 	_texts.emplace_back(healthText);
 }
 
-void Menu::GameOver(int score)
+void Menu::GameOver(int player_HP, int score, int planet_HP)
 {
 	if (score > _highScore)
 	{
@@ -95,6 +95,12 @@ void Menu::GameOver(int score)
 		f.clear();
 		f << _highScore;
 	}
+
+	std::string causeOfLose;
+	if (player_HP <= 0)
+		causeOfLose = "Your ship broke apart !";
+	else if (planet_HP <= 0)
+		causeOfLose = "The earth took too much damages !";
 
 	_elements.clear();
 	_texts.clear();
@@ -110,7 +116,7 @@ void Menu::GameOver(int score)
 	endText.setColor(sf::Color::White);
 	endText.setFont(Properties::Instance()->GetMainFont());
 	endText.setCharacterSize(Properties::FONT_SIZE);
-	endText.setString("GAME OVER\n\n\n\n\nyour score : " + std::to_string(score) + "\nHIGH SCORE: "
+	endText.setString("GAME OVER\n\n" + causeOfLose + "\n\n\n\n\nyour score : " + std::to_string(score) + "\nHIGH SCORE: "
 		+ std::to_string(_highScore) + "\n\n\n\n\nPress B to go back to main menu!");
 	endText.setOrigin(endText.getGlobalBounds().width / 2, endText.getGlobalBounds().height / 2);
 	endText.setPosition(end.getPosition());
