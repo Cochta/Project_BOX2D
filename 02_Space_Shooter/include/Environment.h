@@ -2,11 +2,7 @@
 
 #include "Properties.h"
 #include "Utility.h"
-
-#include "Laser.h"
-
-#include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
+#include "ContactEvent.h"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
@@ -14,7 +10,6 @@
 #include <box2d/b2_fixture.h>
 #include <box2d/box2d.h>
 
-#include <list>
 enum class Wall
 {
 	Left,

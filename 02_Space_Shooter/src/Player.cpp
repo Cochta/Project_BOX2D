@@ -18,7 +18,7 @@ void Player::Init(b2World& world)
 	b2BodyDef bodyDef;
 	bodyDef.fixedRotation = true;
 	bodyDef.type = b2_dynamicBody;
-	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT));
+	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::Instance()->GetScreenWidth(), Properties::Instance()->GetScreenHeight()));
 	bodyDef.position.Set(windowSize.x / 2, windowSize.y / 2);
 
 	_body = world.CreateBody(&bodyDef);
@@ -44,7 +44,8 @@ void Player::Init(b2World& world)
 
 void Player::Move(float time)
 {
-	_body->ApplyForceToCenter(b2Vec2(_direction.x * Properties::PLAYER_SPEED * time, _direction.y * Properties::PLAYER_SPEED * time), true);
+	_body->SetLinearVelocity(b2Vec2(_direction.x * Properties::PLAYER_SPEED * time, _direction.y * Properties::PLAYER_SPEED * time));
+	//_body->ApplyForceToCenter(b2Vec2(_direction.x * Properties::PLAYER_SPEED * time, _direction.y * Properties::PLAYER_SPEED * time), true);
 }
 
 void Player::Fire(b2World& world)

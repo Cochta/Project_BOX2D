@@ -8,46 +8,44 @@
 #include <SFML/Audio/Music.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 
+#include <iomanip>
+#include <sstream>
+#include <windows.h>
+
+#include <vector>
+
 class Properties
 {
 public:
-	enum class Type
-	{
-		Asteroid = 1,
-		Laser
-	};
-	static constexpr int WINDOW_SIZE_WIDTH = 1300;
-	static constexpr int WINDOW_SIZE_HEIGHT = 900;
+	const std::string MAIN_FONT_PATH = "data/assets/Bonus/kenvector_future_thin.ttf";
+	inline static int FONT_SIZE = 20;
 
-	inline static const std::string MAIN_FONT_PATH = "data/assets/Bonus/kenvector_future_thin.ttf";
-	static constexpr int FONT_SIZE = 20;
+	const std::string BACKGROUND_PATH = "data/assets/Backgrounds/blue.PNG";
 
-	inline static const std::string BACKGROUND_PATH = "data/assets/Backgrounds/blue.PNG";
+	const std::string PLAYER_PATH = "data/assets/PNG/playerShip2_blue.png";
+	inline static float PLAYER_SPEED = 300.0f;
 
-	inline static const std::string PLAYER_PATH = "data/assets/PNG/playerShip2_blue.png";
-	static constexpr float PLAYER_SPEED = 300.0f;
+	const std::string LASER_PATH = "data/assets/PNG/Lasers/laserBlue01.png";
+	inline static float FIRE_RATE = 0.25f; //sec
+	inline static float LASER_SPEED = 40.0f;
 
-	inline static const std::string LASER_PATH = "data/assets/PNG/Lasers/laserBlue01.png";
-	static constexpr float FIRE_RATE = 0.33f; //sec
-	static constexpr float LASER_SPEED = 40.0f;
+	const std::string PLANET_PATH = "data/assets/PNG/earth.png";
 
-	inline static const std::string PLANET_PATH = "data/assets/PNG/earth.png";
+	std::string EXPLOSION_PATH = "data/assets/PNG/boom.png";
 
-	inline static const std::string EXPLOSION_PATH = "data/assets/PNG/boom.png";
-
-	inline static const std::string THEME_PATH = "data/sounds/Theme.flac";
+	const std::string THEME_PATH = "data/sounds/Theme.flac";
 
 	/*inline static const std::string BOOM_PATH = "data/sounds/Boom.wav";
 	inline static const std::string CLONG_PATH = "data/sounds/Clong.wav"; // version débile
 	inline static const std::string PIOU_PATH = "data/sounds/Tic.wav";
 	inline static const std::string FLOP_PATH = "data/sounds/Flop.wav";*/
 
-	inline static const std::string BOOM_PATH = "data/sounds/AsteroidBreak.ogg";
-	inline static const std::string CLONG_PATH = "data/sounds/DamageTaken.ogg";// version normale
-	inline static const std::string PIOU_PATH = "data/sounds/Piou.ogg";
-	inline static const std::string FLOP_PATH = "data/sounds/EarthDamaged.ogg";
+	const std::string BOOM_PATH = "data/sounds/AsteroidBreak.ogg";
+	const std::string CLONG_PATH = "data/sounds/DamageTaken.ogg";// version normale
+	const std::string PIOU_PATH = "data/sounds/Piou.ogg";
+	const std::string FLOP_PATH = "data/sounds/EarthDamaged.ogg";
 
-	static constexpr float ENEMY_SPAWN_RATE = 1.0f; //sec
+	inline static float ENEMY_SPAWN_RATE = 0.5f; //sec
 
 	Properties(Properties& other) = delete;
 
@@ -70,6 +68,9 @@ public:
 	sf::SoundBuffer& GetPiou();
 	sf::SoundBuffer& GetFlop();
 
+	int& GetScreenWidth();
+	int& GetScreenHeight();
+
 private:
 	Properties();
 
@@ -89,5 +90,8 @@ private:
 	sf::SoundBuffer _clong;
 	sf::SoundBuffer _piou;
 	sf::SoundBuffer _flop;
+
+	int _screenWidth;
+	int _screenHeight;
 };
 

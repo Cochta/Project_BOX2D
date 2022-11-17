@@ -26,23 +26,21 @@ void Contact::BeginContact(b2Contact* contact)
 
 		if (infoA->TypeOfContact == ContactType::Laser && infoB->TypeOfContact == ContactType::Asteroid)
 		{
-			infoA->_laser->player.AddScore(50);
+			infoA->_laser->player.AddScore(100);
 			infoB->_asteroid->SetExploded();
 			infoA->_laser->SetBroken();
 			_boom.play();
 		}
 		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Laser)
 		{
-			infoB->_laser->player.AddScore(50);
+			infoB->_laser->player.AddScore(100);
 			infoA->_asteroid->SetExploded();
 			infoB->_laser->SetBroken();
 			_boom.play();
 		}
 		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Asteroid)
 		{
-			//do boom
-			/*infoB->_asteroid->SetBroken();
-			infoA->_asteroid->SetBroken();*/
+			//do something (actually nothing)
 		}
 		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Player)
 		{
@@ -55,16 +53,16 @@ void Contact::BeginContact(b2Contact* contact)
 			infoA->_player->TakeDMG();
 			infoB->_asteroid->SetExploded();
 			_clong.play();
-		} 
+		}
 		else if (infoA->TypeOfContact == ContactType::Planet && infoB->TypeOfContact == ContactType::Asteroid)
 		{
-			infoA->_planet->player.AddScore(-100);
+			infoA->_planet->TakeDMG();
 			infoB->_asteroid->SetExploded();
 			_flop.play();
 		}
 		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Planet)
 		{
-			infoB->_planet->player.AddScore(-100);
+			infoB->_planet->TakeDMG();
 			infoA->_asteroid->SetExploded();
 			_flop.play();
 		}
@@ -83,11 +81,13 @@ void Contact::EndContact(b2Contact* contact)
 
 		if (infoA->TypeOfContact == ContactType::Environment && infoB->TypeOfContact == ContactType::Asteroid)
 		{
-			infoB->_asteroid->SetBroken();
+			if (infoB->_asteroid->IsInAnimation())
+				infoB->_asteroid->SetBroken();
 		}
 		else if (infoA->TypeOfContact == ContactType::Asteroid && infoB->TypeOfContact == ContactType::Environment)
 		{
-			infoA->_asteroid->SetBroken();
+			if (infoA->_asteroid->IsInAnimation())
+				infoA->_asteroid->SetBroken();
 		}
 		else if (infoA->TypeOfContact == ContactType::Laser && infoB->TypeOfContact == ContactType::Roof)
 		{

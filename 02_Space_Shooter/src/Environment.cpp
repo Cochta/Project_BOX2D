@@ -1,5 +1,7 @@
 #include "Environment.h"
 
+
+
 Environment::Environment(Wall wall, b2World& world)
 {
 	if (wall == Wall::Left)
@@ -9,7 +11,7 @@ Environment::Environment(Wall wall, b2World& world)
 		b2Body* leftWallBody = world.CreateBody(&leftWallBD);
 
 		b2PolygonShape leftWallBox;
-		leftWallBox.SetAsBox(1.0f / Utility::PIXEL_METER_RATIO, static_cast<float>(Properties::WINDOW_SIZE_HEIGHT));
+		leftWallBox.SetAsBox(1.0f / Utility::PIXEL_METER_RATIO, static_cast<float>(Properties::Instance()->GetScreenHeight()));
 
 		b2FixtureDef leftWallFixtureDef;
 		leftWallFixtureDef.shape = &leftWallBox;
@@ -22,11 +24,11 @@ Environment::Environment(Wall wall, b2World& world)
 	else if (wall == Wall::Right)
 	{
 		b2BodyDef rightWallBD;
-		rightWallBD.position.Set(static_cast<float>(Properties::WINDOW_SIZE_WIDTH) / Utility::PIXEL_METER_RATIO, 0.0f);
+		rightWallBD.position.Set(static_cast<float>(Properties::Instance()->GetScreenWidth()) / Utility::PIXEL_METER_RATIO, 0.0f);
 		b2Body* rightWallBody = world.CreateBody(&rightWallBD);
 
 		b2PolygonShape rightWallBox;
-		rightWallBox.SetAsBox(1.0f / Utility::PIXEL_METER_RATIO, static_cast<float>(Properties::WINDOW_SIZE_HEIGHT));
+		rightWallBox.SetAsBox(1.0f / Utility::PIXEL_METER_RATIO, static_cast<float>(Properties::Instance()->GetScreenHeight()));
 
 		b2FixtureDef rightWallFixtureDef;
 		rightWallFixtureDef.shape = &rightWallBox;
@@ -39,26 +41,27 @@ Environment::Environment(Wall wall, b2World& world)
 	else if (wall == Wall::Bottom)
 	{
 		b2BodyDef floorBD;
-		floorBD.position.Set(0.0f, (Properties::WINDOW_SIZE_HEIGHT / Utility::PIXEL_METER_RATIO));
+		floorBD.position.Set(0.0f, (Properties::Instance()->GetScreenHeight() / Utility::PIXEL_METER_RATIO));
 		b2Body* floorBody = world.CreateBody(&floorBD);
 
 		b2PolygonShape floorBox;
-		floorBox.SetAsBox(static_cast<float>(Properties::WINDOW_SIZE_WIDTH), (Properties::WINDOW_SIZE_HEIGHT / 12) / Utility::PIXEL_METER_RATIO);
+		floorBox.SetAsBox(static_cast<float>(Properties::Instance()->GetScreenWidth()), (Properties::Instance()->GetScreenHeight() / 12) / Utility::PIXEL_METER_RATIO);
 
 		b2FixtureDef floorFixtureDef;
 		floorFixtureDef.shape = &floorBox;
-		floorFixtureDef.density = 1.0f;
+		floorFixtureDef.density = 0.0f;
+		floorFixtureDef.friction = 0.0;
 
 		/*ContactEvent* m_userData = new ContactEvent(*this);
 		floorFixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(m_userData);*/
 		floorBody->CreateFixture(&floorFixtureDef);
 
 		b2BodyDef floorBD2;
-		floorBD2.position.Set(0.0f, (Properties::WINDOW_SIZE_HEIGHT / Utility::PIXEL_METER_RATIO));
+		floorBD2.position.Set(0.0f, (Properties::Instance()->GetScreenHeight() / Utility::PIXEL_METER_RATIO));
 		b2Body* floorBody2 = world.CreateBody(&floorBD2);
 
 		b2PolygonShape floorBox2;
-		floorBox2.SetAsBox(static_cast<float>(Properties::WINDOW_SIZE_WIDTH), 1 / Utility::PIXEL_METER_RATIO);
+		floorBox2.SetAsBox(static_cast<float>(Properties::Instance()->GetScreenWidth()), 1 / Utility::PIXEL_METER_RATIO);
 
 		b2FixtureDef floorFixtureDef2;
 		floorFixtureDef2.shape = &floorBox2;
@@ -78,7 +81,7 @@ Roof::Roof(b2World& world)
 	b2Body* roofBody = world.CreateBody(&roofBD);
 
 	b2PolygonShape roofBox;
-	roofBox.SetAsBox(static_cast<float>(Properties::WINDOW_SIZE_WIDTH), 1.0f / Utility::PIXEL_METER_RATIO);
+	roofBox.SetAsBox(static_cast<float>(Properties::Instance()->GetScreenWidth()), 1.0f / Utility::PIXEL_METER_RATIO);
 
 
 	b2FixtureDef roofFixtureDef;

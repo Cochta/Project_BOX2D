@@ -1,7 +1,5 @@
 #include "Asteroid.h"
 
-#include "Properties.h"
-#include "Properties.h"
 
 Asteroid::Asteroid(float x, float y, int spriteIndex, b2World& world) : _world(world)
 {
@@ -13,7 +11,7 @@ Asteroid::Asteroid(float x, float y, int spriteIndex, b2World& world) : _world(w
 	b2BodyDef bodyDef;
 	bodyDef.fixedRotation = true;
 	bodyDef.type = b2_dynamicBody;
-	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT));
+	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::Instance()->GetScreenWidth(), Properties::Instance()->GetScreenHeight()));
 	bodyDef.position.Set(x, y);
 
 	_body = _world.CreateBody(&bodyDef);
@@ -42,10 +40,6 @@ Asteroid::Asteroid(float x, float y, int spriteIndex, b2World& world) : _world(w
 Asteroid Asteroid::operator=(const Asteroid& other)
 {
 	Asteroid a(other);
-	/*a._world = other._world
-	b2World& _world;
-	sf::Sprite _shape;
-	b2Body* _body;*/
 
 	return a;
 }
@@ -62,6 +56,7 @@ void Asteroid::Update()
 		Boom();
 		_hasExploded = false;
 		_clock.restart();
+		_rotation = Utility::getRandomInt(0, 10) - 5;
 	}
 	b2Vec2 bodyPos = _body->GetPosition();
 
@@ -72,6 +67,7 @@ void Asteroid::Update()
 	_shape.setPosition(graphicPosition);
 	if (_isInAnimation)
 	{
+		_shape.rotate(_rotation);
 		_shape.setScale(_shape.getScale().x + 0.02f, _shape.getScale().y + 0.02f);
 		_shape.setOrigin(_shape.getLocalBounds().width / 2, _shape.getLocalBounds().height / 2);
 		if (_clock.getElapsedTime().asSeconds() >= 1)

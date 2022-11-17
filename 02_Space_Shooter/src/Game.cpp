@@ -1,28 +1,20 @@
 #include "Game.h"
 
-#include <iostream>
-
-
 Game::Game() :
-	_world(b2Vec2(0.0f, 0.0f)), // gravity
-	_planet(_player)
+	_world(b2Vec2(0.0f, 0.0f)) // gravity
 {
 	Properties::Instance()->GetTheme().play();
-	Init();
-}
 
-void Game::Init()
-{
-	_window.create(sf::VideoMode(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT), "EARTH DEFENDER", sf::Style::Close);
-	_window.setPosition(sf::Vector2i(500, 0));
+	_window.create(sf::VideoMode(Properties::Instance()->GetScreenWidth(), Properties::Instance()->GetScreenHeight()), "EARTH DEFENDER", sf::Style::Fullscreen);
+	_window.setPosition(sf::Vector2i(0, 0));
 	_window.setVerticalSyncEnabled(true);
 	_window.setFramerateLimit(144);
 
 	sf::Sprite s;
 	s.setTexture(Properties::Instance()->GetBackgroundTexture(), true);
-	for (int i = 0; i < ceil(Properties::WINDOW_SIZE_WIDTH / s.getGlobalBounds().width); ++i)
+	for (int i = 0; i < ceil(Properties::Instance()->GetScreenWidth() / s.getGlobalBounds().width); ++i)
 	{
-		for (int j = 0; j < ceil(Properties::WINDOW_SIZE_HEIGHT / s.getGlobalBounds().height); ++j)
+		for (int j = 0; j < ceil(Properties::Instance()->GetScreenHeight() / s.getGlobalBounds().height); ++j)
 		{
 			s.setPosition(i * s.getGlobalBounds().width, j * s.getGlobalBounds().height);
 			_background.emplace_back(s);
@@ -32,6 +24,7 @@ void Game::Init()
 	_world.SetContactListener(&_contact);
 	_planet.Init(_world);
 }
+
 void Game::Play()
 {
 	CreateEnvironnent();
@@ -74,8 +67,8 @@ void Game::spawnAsteroid()
 	if (IsStarted && _enemyClock.getElapsedTime().asSeconds() >= Properties::ENEMY_SPAWN_RATE)
 	{
 		_asteroids.emplace_back(
-			Utility::getRandomInt(Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH / 10),
-				Utility::PixelsToMeters(Properties::WINDOW_SIZE_WIDTH - (Properties::WINDOW_SIZE_WIDTH / 10))),
+			Utility::getRandomInt(Utility::PixelsToMeters(Properties::Instance()->GetScreenWidth() / 10),
+				Utility::PixelsToMeters(Properties::Instance()->GetScreenWidth() - (Properties::Instance()->GetScreenWidth() / 10))),
 			0,
 			Utility::getRandomInt(0, 11),
 			_world
@@ -91,33 +84,21 @@ void Game::checkEvent(sf::Event& event)
 	{
 		_player.Fire(_world);
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		_player.SetDumping(0);
 		_player.SetDirectionX(-1);
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		_player.SetDumping(0);
 		_player.SetDirectionX(1);
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		_player.SetDumping(0);
 		_player.SetDirectionY(-1);
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		_player.SetDumping(0);
 		_player.SetDirectionY(1);
-	}
-	if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)
-		&& !sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
-		&& !sf::Keyboard::isKeyPressed(sf::Keyboard::Up)
-		&& !sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	{
-		_player.SetDumping(100);
-		_player.SetDirection(b2Vec2(0, 0));
 	}
 }
 
@@ -126,6 +107,22 @@ void Game::checkEventPoll(sf::Event& event)
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Space)
 	{
 		_player.time = sf::seconds(3.0f);
+	}
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A)
+	{
+		_player.SetDirectionX(0);
+	}
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D)
+	{
+		_player.SetDirectionX(0);
+	}
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W)
+	{
+		_player.SetDirectionY(0);
+	}
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S)
+	{
+		_player.SetDirectionY(0);
 	}
 	if (event.type == sf::Event::Closed)
 	{
@@ -158,13 +155,14 @@ void Game::checkEventPoll(sf::Event& event)
 		_world.DestroyBody(_player.GetBody());
 		_player = Player();
 		_asteroids.clear();
+		_planet.ResetHP();
 	}
 }
 
 void Game::update(sf::Clock& clock, sf::Time& totalElapsed)
 {
 	sf::Time elapsed = clock.restart();
-	if (_player.GetHP() <= 0)
+	if (_player.GetHP() <= 0 || _planet.GetHP() <= 0)
 	{
 		Lost = true;
 	}
@@ -211,7 +209,7 @@ void Game::display()
 	_window.draw(_player);
 	if (IsStarted && !Lost)
 	{
-		_menu.InGame(_player.GetHP(), _player.GetScore());
+		_menu.InGame(_player.GetHP(), _player.GetScore(), _planet.GetHP());
 	}
 
 	_window.draw(_menu);

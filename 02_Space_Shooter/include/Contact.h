@@ -1,6 +1,8 @@
 #pragma once
 
 #include <box2d/b2_world_callbacks.h>
+#include <SFML/Audio/Sound.hpp>
+
 
 #include "Laser.h"
 #include "Asteroid.h"

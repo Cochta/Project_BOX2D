@@ -10,7 +10,7 @@ Laser::Laser(b2World& world, float x, float y, Player& player) : _world(world), 
 	b2BodyDef bodyDef;
 	bodyDef.fixedRotation = true;
 	bodyDef.type = b2_dynamicBody;
-	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT));
+	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::Instance()->GetScreenWidth(), Properties::Instance()->GetScreenHeight()));
 	bodyDef.position.Set(x, y - Utility::PixelsToMeters(_shape.getLocalBounds().height));
 
 	_body = _world.CreateBody(&bodyDef);

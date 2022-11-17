@@ -1,7 +1,6 @@
 #pragma once
 
 #include <random>
-#include <string>
 
 #include <box2d/b2_math.h>
 #include <SFML/Graphics.hpp>

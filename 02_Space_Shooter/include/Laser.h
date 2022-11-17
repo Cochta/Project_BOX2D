@@ -5,7 +5,6 @@
 #include "ContactEvent.h"
 
 #include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
@@ -13,7 +12,6 @@
 #include <box2d/b2_fixture.h>
 #include <box2d/box2d.h>
 
-#include <vector>
 class Laser : public sf::Drawable
 {
 private:

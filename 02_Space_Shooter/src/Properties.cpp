@@ -1,10 +1,5 @@
 #include "Properties.h"
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <vector>
-
 Properties* Properties::_properties = nullptr;
 
 Properties::Properties()
@@ -31,6 +26,9 @@ Properties::Properties()
 	_clong.loadFromFile(CLONG_PATH);
 	_piou.loadFromFile(PIOU_PATH);
 	_flop.loadFromFile(FLOP_PATH);
+
+	_screenWidth = sf::VideoMode::getDesktopMode().width;
+	_screenHeight = sf::VideoMode::getDesktopMode().height;
 }
 Properties* Properties::Instance()
 {
@@ -77,4 +75,14 @@ sf::SoundBuffer& Properties::GetPiou() {
 }
 sf::SoundBuffer& Properties::GetFlop() {
 	return _flop;
+}
+
+int& Properties::GetScreenWidth()
+{
+	return _screenWidth;
+}
+
+int& Properties::GetScreenHeight()
+{
+	return _screenHeight;
 }

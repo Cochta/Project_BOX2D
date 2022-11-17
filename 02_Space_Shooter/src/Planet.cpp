@@ -1,6 +1,6 @@
 #include "Planet.h"
 
-Planet::Planet(Player& player) :player(player)
+Planet::Planet()
 {
 
 }
@@ -14,7 +14,7 @@ void Planet::Init(b2World& world)
 	b2BodyDef bodyDef;
 	bodyDef.fixedRotation = true;
 	bodyDef.type = b2_staticBody;
-	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::WINDOW_SIZE_WIDTH, Properties::WINDOW_SIZE_HEIGHT));
+	b2Vec2 windowSize = Utility::PixelsToMeters(sf::Vector2f(Properties::Instance()->GetScreenWidth(), Properties::Instance()->GetScreenHeight()));
 	bodyDef.position.Set(windowSize.x / 2, (windowSize.y + Utility::PixelsToMeters(_shape.getGlobalBounds().height / 2)) - windowSize.y / 12);
 
 	_body = world.CreateBody(&bodyDef);

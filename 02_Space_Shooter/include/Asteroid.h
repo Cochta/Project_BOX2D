@@ -7,12 +7,9 @@
 #include "ContactEvent.h"
 
 #include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
-#include <box2d/b2_polygon_shape.h>
-#include <box2d/b2_fixture.h>
 #include <box2d/box2d.h>
 
 class Asteroid : public sf::Drawable
@@ -27,6 +24,7 @@ public:
 
 	bool HasExploded() { return _hasExploded; }
 	void SetExploded() { _hasExploded = true; }
+	bool IsInAnimation() { return _isInAnimation; }
 
 	void Update();
 	void SetDirection(float x, float y) { _body->ApplyForceToCenter(b2Vec2(x, y), true); }
@@ -47,4 +45,5 @@ private:
 	b2Fixture* _fixture;
 
 	sf::Clock _clock;
+	float _rotation;
 };

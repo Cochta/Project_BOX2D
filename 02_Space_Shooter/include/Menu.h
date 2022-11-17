@@ -2,11 +2,12 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <format> 
 
 #include "Properties.h"
 
 #include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
 
 #include <vector>
 class Menu : public sf::Drawable
@@ -16,7 +17,7 @@ public:
 
 	void Main();
 
-	void InGame(int HP, int score);
+	void InGame(int HP, int score, int planet_HP);
 
 	void GameOver(int score);
 

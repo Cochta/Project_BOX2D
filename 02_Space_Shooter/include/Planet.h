@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Player.h"
 #include "Properties.h"
 #include "Utility.h"
 
 #include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
@@ -12,16 +12,14 @@
 #include <box2d/b2_fixture.h>
 #include <box2d/box2d.h>
 
-#include <vector>
-
-#include "Player.h"
-
 class Planet : public sf::Drawable
 {
 public:
-	Planet(Player& player);
+	Planet();
 
-	Player& player;
+	void TakeDMG() { _HP -= 1; }
+	int GetHP() { return _HP; }
+	void ResetHP() { _HP = 5; }
 
 	void Init(b2World& world);
 
@@ -32,4 +30,6 @@ public:
 private:
 	sf::Sprite _shape;
 	b2Body* _body{};
+
+	int _HP = 5;
 };
